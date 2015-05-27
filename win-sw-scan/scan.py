@@ -105,7 +105,7 @@ USAGE
     except KeyboardInterrupt:
         ### handle keyboard interrupt ###
         return 0
-    except( Exception, e ):
+    except Exception as e:
         if DEBUG or TESTRUN:
             raise(e)
         indent = len(program_name) * " "
@@ -114,6 +114,20 @@ USAGE
         return 2
 
 if __name__ == "__main__":
+    import subprocess
+    import shlex
+    print(sys.stdout.encoding)
+    proc = subprocess.Popen("assoc", shell=True, stdout=subprocess.PIPE)
+    for line in proc.stdout:
+        sline = line.decode(sys.stdout.encoding)
+        print(sline.rstrip().split("=",1))
+    proc = subprocess.Popen("ftype", shell=True, stdout=subprocess.PIPE)
+    for line in proc.stdout:
+        sline = line.decode(sys.stdout.encoding)
+        k,v = sline.rstrip().split("=",1)
+        ve = os.path.expandvars(v)
+        splut = shlex.split(ve)
+        print(k,v,splut)
     if DEBUG:
         sys.argv.append("-h")
         sys.argv.append("-v")
