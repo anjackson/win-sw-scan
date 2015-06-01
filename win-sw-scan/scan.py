@@ -22,6 +22,7 @@ import os
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+from turtle import Vec2D
 
 __all__ = []
 __version__ = 0.1
@@ -116,18 +117,44 @@ USAGE
 if __name__ == "__main__":
     import subprocess
     import shlex
+    import pprint
     print(sys.stdout.encoding)
+    #
+    assoc = {}
+    #
     proc = subprocess.Popen("assoc", shell=True, stdout=subprocess.PIPE)
     for line in proc.stdout:
         sline = line.decode(sys.stdout.encoding)
-        print(sline.rstrip().split("=",1))
+        v, k = sline.rstrip().split("=",1)
+        if k in assoc:
+            assoc[k].append(v)
+        else:
+            assoc[k] = []
+            assoc[k].append(v)
+            
+    #
+    ftype = {}
     proc = subprocess.Popen("ftype", shell=True, stdout=subprocess.PIPE)
     for line in proc.stdout:
         sline = line.decode(sys.stdout.encoding)
         k,v = sline.rstrip().split("=",1)
         ve = os.path.expandvars(v)
-        splut = shlex.split(ve)
-        print(k,v,splut)
+        ftype[k] = ve
+    #
+    types = {}
+    for k in assoc.keys():
+        if k in ftype:
+            fk = ftype[k]
+        else:
+            fk = ""
+        cmd = shlex.split(fk)
+        # grab info on some of the files?
+        # store
+        types[ k ] =  { 'exts' : assoc[k], 'cmd' : cmd }
+    #
+    pprint.pprint(types)
+    exit()
+    #
     if DEBUG:
         sys.argv.append("-h")
         sys.argv.append("-v")
